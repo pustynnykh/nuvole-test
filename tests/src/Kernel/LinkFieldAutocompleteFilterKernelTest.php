@@ -38,29 +38,37 @@ class LinkFieldAutocompleteFilterKernelTest extends KernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
+    // Init default schemas and configurations.
     $this->installSchema('system', 'sequences');
     $this->installSchema('node', 'node_access');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installConfig('node');
     $this->installConfig('text');
+    // Create required content types.
     $this->createContentType([
-      'type' => 'test_content',
+      'type' => 'host_type',
+      'name' => 'Host type',
       'display_submitted' => FALSE,
     ]);
-    $this->nodeTypeStorage = $this->container->get('entity_type.manager')->getStorage('node_type');
+    $this->createContentType([
+      'type' => 'referencable_type',
+      'name' => 'Referencable type',
+      'display_submitted' => FALSE,
+    ]);
   }
 
   /**
    * Test content type options.
    */
   public function testContentTypesOptions() {
-    $content_types_entities = $this->nodeTypeStorage->loadMultiple();
-    $content_types = array_map(function ($content_type) {
-      return $content_type->id();
-    }, $content_types_entities);
+    // Test allowed content types options.
     $actual_types = _link_field_autocomplete_content_types_options();
-    $this->assertEquals($content_types, $actual_types);
+    $this->assertEquals(2, count($actual_types));
+    $this->assertEquals([
+      'host_type' => 'host_type',
+      'referencable_type' => 'referencable_type',
+    ], $actual_types);
   }
 
 }
